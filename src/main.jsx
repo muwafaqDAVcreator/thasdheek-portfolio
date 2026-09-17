@@ -351,6 +351,7 @@ const seedData = {
 };
 
 const iconMap = { BarChart3, FileText, Building2, BriefcaseBusiness, Award, Wrench };
+const API_URL = 'http://localhost:3000/api';
 
 function usePortfolioData() {
   const [data, setData] = useState(() => {
@@ -361,6 +362,58 @@ function usePortfolioData() {
       return seedData;
     }
   });
+
+  // Fetch data from backend API on mount
+  useEffect(() => {
+    const withId = (item) => ({ ...item, id: item._id });
+    const byOrder = (a, b) => (a.order ?? 0) - (b.order ?? 0);
+    const byPriority = (a, b) => (a.priority ?? 0) - (b.priority ?? 0);
+
+    const fetchData = async () => {
+      try {
+        const [settingsRes, projRes, skillRes, toolRes, shuraRes, expRes, certRes] = await Promise.all([
+          fetch(`${API_URL}/settings`),
+          fetch(`${API_URL}/projects`),
+          fetch(`${API_URL}/skills`),
+          fetch(`${API_URL}/tools`),
+          fetch(`${API_URL}/shura`),
+          fetch(`${API_URL}/experience`),
+          fetch(`${API_URL}/certificates`)
+        ]);
+
+        const settings = settingsRes.ok ? await settingsRes.json() : null;
+        const projects = projRes.ok ? await projRes.json() : [];
+        const skills = skillRes.ok ? await skillRes.json() : [];
+        const tools = toolRes.ok ? await toolRes.json() : [];
+        const shura = shuraRes.ok ? await shuraRes.json() : [];
+        const experience = expRes.ok ? await expRes.json() : [];
+        const certificates = certRes.ok ? await certRes.json() : [];
+
+        setData((prev) => ({
+          ...prev,
+          ...(settings ? { hero: { ...prev.hero, ...settings.hero }, about: settings.about || prev.about, contact: { ...prev.contact, ...settings.contact } } : {}),
+          ...(projects.length
+            ? {
+                projects: projects
+                  .filter((p) => p.published)
+                  .map((p) => ({ ...withId(p), tags: Array.isArray(p.tags) ? p.tags.join(", ") : p.tags }))
+                  .sort(byOrder)
+              }
+            : {}),
+          ...(skills.length ? { skills: skills.filter((s) => s.published).map(withId).sort(byOrder) } : {}),
+          ...(tools.length ? { tools: tools.filter((t) => t.published).map(withId).sort(byPriority) } : {}),
+          ...(shura.length ? { shura: shura.filter((s) => s.published).map(withId).sort(byOrder) } : {}),
+          ...(experience.length ? { experience: experience.filter((e) => e.published).map(withId).sort(byOrder) } : {}),
+          ...(certificates.length ? { certificates: certificates.filter((c) => c.published).map(withId).sort(byOrder) } : {})
+        }));
+      } catch (err) {
+        console.error('Error fetching from API:', err);
+        // Falls back to seedData if API fails
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("thasdheeque-cms-data", JSON.stringify(data));
@@ -543,7 +596,7 @@ function PublicSite({ data, onAdminOpen, theme, setTheme }) {
             <a className="primary-button" href="#projects">
               {data.hero.primaryCta} <ArrowRight size={18} />
             </a>
-            <a className="secondary-button" href={ASSETS.cv} target="_blank" rel="noreferrer">
+            <a className="secondary-button" href={data.hero.cvFile || ASSETS.cv} target="_blank" rel="noreferrer">
               {data.hero.secondaryCta} <FileText size={18} />
             </a>
           </div>

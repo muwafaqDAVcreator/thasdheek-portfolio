@@ -1419,13 +1419,26 @@ td:first-child {
   }
 
   .hero-visual {
-    min-height: 560px;
+    min-height: 0;
+    display: flex;
+    justify-content: center;
   }
 
   .hero-visual img {
-    right: -20% !important;
-    width: min(90vw, 900px) !important;
-    height: min(90vh, 950px) !important;
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto !important;
+    top: auto;
+    display: block;
+    margin: 32px auto 0;
+    width: min(60vw, 460px) !important;
+    height: auto !important;
+    max-height: none;
+  }
+
+  .hero-visual img:hover {
+    transform: scale(1.04);
   }
 
   .project-grid,
@@ -1453,14 +1466,30 @@ td:first-child {
 
 @media (max-width: 760px) {
   .nav {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
     padding: 12px clamp(12px, 3vw, 24px);
+    row-gap: 10px;
+  }
+
+  .brand {
+    order: 1;
+  }
+
+  .nav-actions {
+    order: 2;
+    margin-left: auto;
   }
 
   .nav-links {
+    order: 3;
+    flex-basis: 100%;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 14px 18px;
+  }
+
+  .site-shell {
+    padding-top: 104px;
   }
 
   .hero {
@@ -1470,15 +1499,25 @@ td:first-child {
   }
 
   .hero-visual {
-    min-height: 350px;
+    min-height: 0;
   }
 
   .hero-visual img {
+    position: relative;
+    bottom: auto;
     left: auto;
-    right: -15% !important;
+    right: auto !important;
+    top: auto;
     transform: none;
-    width: min(85vw, 600px) !important;
-    height: min(70vh, 700px) !important;
+    display: block;
+    margin: 24px auto 0;
+    width: min(72vw, 320px) !important;
+    height: auto !important;
+    max-height: none;
+  }
+
+  .hero-visual img:hover {
+    transform: none;
   }
 
   .hero h1 {
